@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Countdown Timer</title>
+	<style>
+	
+	body {
+		background: #252525;
+		color: white;
+		font-family: Arial, sans-serif;
+		text-align: center;
+		margin-top: 50px;
+	}
+	#countdown {
+		font-size: 4em;
+		margin-top: 20px;
+	}
+	input {
+		font-size: 1.2em;
+		margin-top: 20px;
+	}
+	button {
+		font-size: 1.5em;
+		margin-top: 20px;
+	}
+	label {
+		font-size: 1.5em;
+		margin-top: 20px;
+	}
+	#savedata,#cleardata,#localdata {
+		font-size: 1.2em;
+		margin-top: 10px;
+	}
+	#custom-alert {
+		
+		position: fixed;
+		background-color: rgba(64, 0, 0, 1);
+		color: red;
+		padding: 15px;
+		z-index: 100;
+		border-radius: 10px;
+		border: 2px solid red;
+		font-size: 1.2vw;
+	}
+	</style>
+</head>
+<body onload="SetUp()">
+	<h1>Countdown Timer</h1>
+	<label id="headLabel" for="datetime">Choose date and time</label>
+	<br>
+	<input type="datetime-local" id="datetime">
+	<br>
+	<button id="startbutton" onclick="startCountdown()">Start Countdown</button>
+
+	<div id="countdown"></div>
+	<br>
+	<button onclick="saveLocalStorage()" id="savedata" title="Save localStorage">Save localStorage</button>
+	<button onclick="clearLocalStorage()" id="cleardata" title="Clear localStorage">Clear localStorage</button>
+	<div id="localdata"></div>
+
+	<script>
+	
+		let now = new Date().getTime();
+		let date = document.getElementById("datetime");
+		const cleardata = document.getElementById("cleardata");
+		const savedata = document.getElementById("savedata");
+		const headLabel = document.getElementById("headLabel");
+
+		function saveLocalStorage() {
+			const orig = savedata.innerHTML;
+			if (date.value) {
+				localStorage.setItem("memotime", date.value);
+				savedata.innerHTML = 'Saved!';
+				setTimeout(() => {
+					savedata.innerHTML = orig;
+				}, 2000);
+			} else {
+				savedata.innerHTML = 'date and time not found';
+				setTimeout(() => {
+					savedata.innerHTML = orig;
+				}, 2000);
+			}
+			LocalData()
+		}
+		
+		function clearLocalStorage() {
+			const orig = cleardata.innerHTML;
+			localStorage.removeItem("memotime");
+			cleardata.innerHTML = 'Cleared!';
+			setTimeout(() => {
+				cleardata.innerHTML = orig;
+			}, 2000);
+			LocalData()
+		}
+		
+		function LocalData() {
+			document.getElementById("localdata").innerHTML = "localStorage: "  + localStorage.getItem("memotime");
+		}
+		
+		function SetUp() {
+			let number = localStorage.getItem("memotime");
+			if (number) {
+				cleardata.style.display = '';
+				date.value = number;
+				startCountdown()
+			}
+			LocalData()
+		}
+
+		function startCountdown() {
+		
+			let countdownInterval;
+			clearInterval(countdownInterval);
+			
+			const target = date.value;
+			
+			if (!target) {
+				const orig = headLabel.innerHTML;
+				headLabel.innerHTML = "Please select a date and time!";
+				headLabel.style.color = 'red';
+				setTimeout(() => {
+					headLabel.style.color = 'white';
+					headLabel.innerHTML = orig;
+				}, 3000);
+				return;
+			}
+			
+			const targetDate = new Date(target).getTime();
+			
+			countdownInterval = setInterval(() => {
+			
+				now = new Date().getTime();
+				const distance = targetDate - now;
+
+				if (distance < 0) {
+					clearInterval(countdownInterval);
+					document.getElementById("countdown").innerHTML = "Countdown finished!";
+					return;
+				}
+
+				const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+				const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+				const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+				const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+				document.getElementById("countdown").innerHTML =
+					days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+			}, 1000);
+		}
+		
+	</script>
+</body>
+</html>
